@@ -23,7 +23,6 @@
 
 class TubesUsermod : public Usermod {
   private:
-    BeatController beats;
     PatternController controller = PatternController();
     DebugController debug = DebugController(controller);
     Master master = Master(controller);
