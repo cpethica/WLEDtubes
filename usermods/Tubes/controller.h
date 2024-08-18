@@ -909,29 +909,6 @@ class PatternController : public MessageReceiver {
     return color;
   }
 
-  CRGB getBlendedPixelColor(int32_t pos) {
-    // Calculate the color of the pixel at position i by blending the colors of the virtual strips
-    CRGB color = CRGB::Black;
-
-    for (uint8_t i=0; i < NUM_VSTRIPS; i++) {
-      VirtualStrip *vstrip = vstrips[i];
-
-      // Don't bother blending a fully faded strip, or the WLED strip itself
-      if (vstrip->fade == Dead || vstrip->isWled())
-        continue;
-
-      auto br = vstrip->brightness; //(options.brightness, vstrip->brightness);
-
-      // Fetch the color from the strip and dim it according to the brightness
-      CRGB c = vstrip->getPixelColor(pos);
-      nscale8x3(c.r, c.g, c.b, br);
-      nscale8x3(c.r, c.g, c.b, vstrip->fader>>8);
-      color |= c;
-    }
-
-    return color;
-  }
-
   virtual void acknowledge() {
     addFlash(CRGB::Green);
   }
