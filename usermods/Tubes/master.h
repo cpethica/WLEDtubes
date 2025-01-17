@@ -4,14 +4,14 @@
 #include "controller.h"
 #include "led_strip.h"
 
-#define X_AXIS_PIN 33
-#define Y_AXIS_PIN 34
+#define X_AXIS_PIN 20
+#define Y_AXIS_PIN 21
 
-#define BUTTON_PIN_1   32  // SELECT?
-#define BUTTON_PIN_2   26  // SKIP
-#define BUTTON_PIN_3   35  // SET COLOR
-#define BUTTON_PIN_4   27  // TAP
-#define BUTTON_PIN_5   14  // "NEXT!"
+#define BUTTON_PIN_1   70  // SELECT?
+#define BUTTON_PIN_2   71  // SKIP
+#define BUTTON_PIN_3   72  // SET COLOR
+#define BUTTON_PIN_4   23  // TAP
+#define BUTTON_PIN_5   25  // "NEXT!"
 
 
 class Master {

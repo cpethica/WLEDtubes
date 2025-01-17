@@ -4,7 +4,9 @@
 #include "global_state.h"
 #include "espnow_broadcast.h"
 
-// #define NODE_DEBUGGING
+#define DEFAULT_WIFI "TP-Link_FB90"
+#define DEFAULT_WIFI_PASSWORD "50032075"
+#define NODE_DEBUGGING
 // #define RELAY_DEBUGGING
 #define TESTING_NODE_ID 0
 

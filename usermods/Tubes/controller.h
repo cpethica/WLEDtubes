@@ -372,8 +372,9 @@ class PatternController : public MessageReceiver {
     Segment& segment = strip.getMainSegment();
 
     // You can only go into manual control after enabling the wifi
-    if (apActive && updater.status != Ready)
+    if (apActive && updater.status != Ready) {
       canOverride = true;
+    }
 
     // Detect manual overrides & update the current state to match.
     if (canOverride) {
@@ -431,21 +432,21 @@ class PatternController : public MessageReceiver {
     uint16_t length = strip.getLengthTotal();
 
     // Crossfade between the custom pattern engine and WLED
-    uint8_t fader = wled_fader >> 8;
-    if (fader < 255) {
-      // Perform a cross-fade between current WLED mode and the external buffer
-      for (int i = 0; i < length; i++) {
-        CRGB c = getBlendedPixelColor(i);
-        if (fader > 0) {
-          CRGB color2 = strip.getPixelColor(i);
-          uint8_t r = blend8(c.r, color2.r, fader);
-          uint8_t g = blend8(c.g, color2.g, fader);
-          uint8_t b = blend8(c.b, color2.b, fader);
-          c = CRGB(r,g,b);
-        }
-        strip.setPixelColor(i, c);
-      }
-    }
+    // uint8_t fader = wled_fader >> 8;
+    // if (fader < 255) {
+    //   // Perform a cross-fade between current WLED mode and the external buffer
+    //   for (int i = 0; i < length; i++) {
+    //     CRGB c = getBlendedPixelColor(i);
+    //     if (fader > 0) {
+    //       CRGB color2 = strip.getPixelColor(i);
+    //       uint8_t r = blend8(c.r, color2.r, fader);
+    //       uint8_t g = blend8(c.g, color2.g, fader);
+    //       uint8_t b = blend8(c.b, color2.b, fader);
+    //       c = CRGB(r,g,b);
+    //     }
+    //     strip.setPixelColor(i, c);
+    //   }
+    // }
 
     // Power Save mode: reduce number of displayed pixels 
     // Only affects non-powered poles
@@ -769,8 +770,8 @@ class PatternController : public MessageReceiver {
   void set_wled_pattern(uint8_t pattern_id, uint8_t speed, uint8_t intensity) {
     if (patternOverride)
       pattern_id = patternOverride;
-    else if (pattern_id == 0)
-      pattern_id = DEFAULT_WLED_FX; // Never set it to solid
+    // else if (pattern_id == 0)
+    //   pattern_id = DEFAULT_WLED_FX; // Never set it to solid
 
     Segment& seg = strip.getMainSegment();
     seg.speed = speed;
