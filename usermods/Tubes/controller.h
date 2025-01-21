@@ -45,6 +45,11 @@ typedef struct {
   TubeState next;
 } TubeStates;
 
+typedef struct {
+  WLEDState testcurrent;
+  WLEDState testnext;
+} WLEDStates;
+
 typedef enum ControllerRole : uint8_t {
   UnknownRole = 0,
   DefaultRole = 10,         // Turn on in power saving mode
@@ -141,6 +146,8 @@ class PatternController : public MessageReceiver {
     Energy energy=Chill;
     TubeState current_state;
     TubeState next_state;
+    WLEDState testcurrent_state;
+    WLEDState testnext_state;
 
     // When a pattern is boring, spice it up a bit with more effects
     bool isBoring = false;
@@ -544,7 +551,9 @@ class PatternController : public MessageReceiver {
   
   void send_update() {
     Serial.print("     ");
-    current_state.print();
+    //current_state.print();
+
+    testcurrent_state.print();
     Serial.print(F(" "));
 
     uint16_t phrase = current_state.beat_frame >> 12;
@@ -555,9 +564,9 @@ class PatternController : public MessageReceiver {
     Serial.print(F("C "));
     Serial.print(next_state.effect_phrase - phrase);
     Serial.print(F("E: "));
-    next_state.print();
-    Serial.print(F(" "));
-    Serial.println();    
+    testnext_state.print();
+    // Serial.print(F(" "));
+    // Serial.println();    
 
     broadcast_state();
   }
@@ -1172,8 +1181,37 @@ class PatternController : public MessageReceiver {
     node.sendCommand(COMMAND_INFO, &info, sizeof(NodeInfo));
   }
 
+// set to broadcast wled state to other??    ( void sendCommand(CommandId command, void *data, uint8_t len) {} )
   void broadcast_state() {
-    node.sendCommand(COMMAND_STATE, &current_state, sizeof(TubeStates));
+    
+    // Segment& mainseg = strip.getMainSegment();
+    testcurrent_state.test = bri;
+    testcurrent_state.test1 = 0;
+    testcurrent_state.test2 = 0;
+    testcurrent_state.test3 = 0;
+    // out_data[0] = 0; 
+    // // uint32_t col = mainseg.colors[0];
+    // out_data[1] = 1;  //R(col);
+    // out_data[2] = 2;  //(col);
+    // outdata[3] = B(col);
+    // outdata[4] = W(col);
+    // // hack current wled values into espnow message
+    // current_state.pattern_id = bri;
+    // current_state.effect_params.beat = outdata[1];
+    // current_state.effect_params.pen = outdata[2];
+    // current_state.palette_id = outdata[3];
+      //     pattern_id,
+      // pattern_sync_id,
+      // palette_id,
+      // effect_params.effect,
+      // effect_params.pen,
+      // effect_params.beat,
+      // effect_params.chance,
+      //node.sendCommand(COMMAND_STATE, &current_state, sizeof(TubeStates));
+    node.sendCommand(COMMAND_STATE, &testcurrent_state, sizeof(WLEDStates));  // &current_state    --- take address of current_state and call void *data with it...
+    //Serial.println("New Data:");
+    //out_data.print_newdata();
+    //Serial.println();
   }
 
   void broadcast_options() {
@@ -1189,7 +1227,7 @@ class PatternController : public MessageReceiver {
     node.sendCommand(COMMAND_BEATS, &bpm, sizeof(bpm));
   }
 
-  virtual bool onCommand(CommandId command, void *data) override {
+  virtual bool onCommand(CommandId command, void *data) override {      // data receiver...
     switch (command) {
       case COMMAND_INFO:
         Serial.printf("   \"%s\"\n",
@@ -1207,19 +1245,26 @@ class PatternController : public MessageReceiver {
         return true;
 
       case COMMAND_STATE: {
+        Serial.println("we're here...");
         auto update_data = (TubeStates*)data;
+        auto test_update_data = (TestStates*)data;
 
         TubeState state;
-        memcpy(&state, &update_data->current, sizeof(TubeState));
-        memcpy(&next_state, &update_data->next, sizeof(TubeState));
-        state.print();
-        next_state.print();
+        TestState test_state;
+        //memcpy(&state, &update_data->current, sizeof(TubeState));
+        //memcpy(&next_state, &update_data->next, sizeof(TubeState));                /// void *memcpy(void *dest_str, const void * src_str, size_t n)
+        memcpy(&test_state, &test_update_data->testcurrent, sizeof(TestStates));
+        memcpy(&testnext_state, &test_update_data->testnext, sizeof(TestStates));
+        test_state.print();
+        testnext_state.print();
+        //out_data.print();
   
         // Catch up to this state
-        load_pattern(state);
-        load_palette(state);
-        load_effect(state);
-        beats.sync(state.bpm, state.beat_frame);
+        bri = test_state.test;
+        // load_pattern(state);
+        // load_palette(state);
+        // load_effect(state);
+        // beats.sync(state.bpm, state.beat_frame);
         return true;
       }
 

@@ -21,6 +21,12 @@ class TubeState {
     uint16_t effect_phrase;
     EffectParameters effect_params;
 
+    // add in variable for new message (should go in new class later)
+    uint16_t test;
+    uint16_t test1;
+    uint16_t test2;
+    uint16_t test3;
+
   void print() {
     uint16_t phrase = beat_frame >> 12;
     uint8_t frac = scale8(100, bpm & 0xFF);
@@ -40,6 +46,40 @@ class TubeState {
     );
     Serial.print(buf);
   }
+  void print_newdata() {
+  char buf[128];
+  sprintf(buf, "[%d %d %d %d]",
+      test,
+      test1,
+      test2,
+      test3
+  );
+  Serial.print(buf);
+}
+
+};
+
+
+// make object for WLED settings of master controller for sending to other nodes
+class WLEDState {
+  public:
+    // add in variable for new message (should go in new class later)
+    uint16_t brightness;
+    uint16_t test1;
+    uint16_t test2;
+    uint16_t test3;
+
+
+  void print() {
+  char buf[128];
+  sprintf(buf, "[%d %d %d %d]",
+      test,
+      test1,
+      test2,
+      test3
+  );
+  Serial.print(buf);
+}
 
 };
 

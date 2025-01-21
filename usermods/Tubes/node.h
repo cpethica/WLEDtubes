@@ -318,7 +318,7 @@ class LightNode {
 #ifdef NODE_DEBUGGING
         Serial.println("sendCommand");
 #endif        
-        broadcastMessage(&message);
+        (&message);
     }
 
     void setup() {
