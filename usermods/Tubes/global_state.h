@@ -65,18 +65,25 @@ class WLEDState {
   public:
     // add in variable for new message (should go in new class later)
     uint16_t brightness;
-    uint16_t test1;
-    uint16_t test2;
-    uint16_t test3;
-
+    uint16_t fx_mode;
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t white;
+    uint16_t primary_col;
+    uint16_t sec_col;
 
   void print() {
   char buf[128];
-  sprintf(buf, "[%d %d %d %d]",
-      test,
-      test1,
-      test2,
-      test3
+  sprintf(buf, "[%d %d %d %d %d %d %d %d]",
+      brightness,
+      fx_mode,
+      red,
+      green,
+      blue,
+      white,
+      primary_col,
+      sec_col
   );
   Serial.print(buf);
 }

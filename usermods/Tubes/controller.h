@@ -225,14 +225,14 @@ class PatternController : public MessageReceiver {
 #ifdef USELCD
     lcd->setup();
 #endif
-    set_next_pattern(0);
-    set_next_palette(0);
-    set_next_effect(0);
-    next_state.pattern_phrase = 0;
-    next_state.palette_phrase = 0;
-    next_state.effect_phrase = 0;
-    set_wled_palette(0); // Default palette
-    set_wled_pattern(0, 128, 128); // Default pattern
+    // set_next_pattern(0);
+    // set_next_palette(0);
+    // set_next_effect(0);
+    // next_state.pattern_phrase = 0;
+    // next_state.palette_phrase = 0;
+    // next_state.effect_phrase = 0;
+    // set_wled_palette(0); // Default palette
+    // set_wled_pattern(0, 128, 128); // Default pattern
 
     sound.setup();
 
@@ -365,16 +365,16 @@ class PatternController : public MessageReceiver {
   {
     read_keys();
     
-    beats.update();
+    //beats.update();
 
     // Update the mesh
     node.update();
 
     // Update sound meter
-    sound.update();
+    //sound.update();
 
     // Update patterns to the beat
-    update_beat();
+    //update_beat();
 
     Segment& segment = strip.getMainSegment();
 
@@ -401,7 +401,7 @@ class PatternController : public MessageReceiver {
       }
     }
 
-    do_pattern_changes();
+    //do_pattern_changes();
 
     if (graphicsTimer.every(REFRESH_PERIOD)) {
       updateGraphics();
@@ -466,13 +466,13 @@ class PatternController : public MessageReceiver {
       }
     }
 
-    sound.handleOverlayDraw();
+    //sound.handleOverlayDraw();
 
     // Draw effects layers over whatever WLED is doing.
     // But not in manual (WLED) mode
-    if (!patternOverride) {
-      effects.draw(&strip);
-    }
+    // if (!patternOverride) {
+    //   effects.draw(&strip);
+    // }
 
     // Make the art half-size if it has a small number of pixels
     if (role >= MasterRole || role == SmallArtRole) {
@@ -1184,29 +1184,18 @@ class PatternController : public MessageReceiver {
 // set to broadcast wled state to other??    ( void sendCommand(CommandId command, void *data, uint8_t len) {} )
   void broadcast_state() {
     
-    // Segment& mainseg = strip.getMainSegment();
-    testcurrent_state.test = bri;
-    testcurrent_state.test1 = 0;
-    testcurrent_state.test2 = 0;
-    testcurrent_state.test3 = 0;
-    // out_data[0] = 0; 
-    // // uint32_t col = mainseg.colors[0];
-    // out_data[1] = 1;  //R(col);
-    // out_data[2] = 2;  //(col);
-    // outdata[3] = B(col);
-    // outdata[4] = W(col);
-    // // hack current wled values into espnow message
-    // current_state.pattern_id = bri;
-    // current_state.effect_params.beat = outdata[1];
-    // current_state.effect_params.pen = outdata[2];
-    // current_state.palette_id = outdata[3];
-      //     pattern_id,
-      // pattern_sync_id,
-      // palette_id,
-      // effect_params.effect,
-      // effect_params.pen,
-      // effect_params.beat,
-      // effect_params.chance,
+    Segment& mainseg = strip.getMainSegment();
+    testcurrent_state.brightness = bri;
+    testcurrent_state.primary_col = 0;
+    testcurrent_state.sec_col = 0;
+    testcurrent_state.fx_mode = effectCurrent;
+
+    uint32_t col = mainseg.colors[0];
+    testcurrent_state.red = R(col);
+    testcurrent_state.green = G(col);
+    testcurrent_state.blue = B(col);
+    testcurrent_state.white = W(col);
+
       //node.sendCommand(COMMAND_STATE, &current_state, sizeof(TubeStates));
     node.sendCommand(COMMAND_STATE, &testcurrent_state, sizeof(WLEDStates));  // &current_state    --- take address of current_state and call void *data with it...
     //Serial.println("New Data:");
@@ -1247,20 +1236,24 @@ class PatternController : public MessageReceiver {
       case COMMAND_STATE: {
         Serial.println("we're here...");
         auto update_data = (TubeStates*)data;
-        auto test_update_data = (TestStates*)data;
+        auto test_update_data = (WLEDStates*)data;
 
         TubeState state;
-        TestState test_state;
+        WLEDState test_state;
         //memcpy(&state, &update_data->current, sizeof(TubeState));
         //memcpy(&next_state, &update_data->next, sizeof(TubeState));                /// void *memcpy(void *dest_str, const void * src_str, size_t n)
-        memcpy(&test_state, &test_update_data->testcurrent, sizeof(TestStates));
-        memcpy(&testnext_state, &test_update_data->testnext, sizeof(TestStates));
+        memcpy(&test_state, &test_update_data->testcurrent, sizeof(WLEDState));
+        memcpy(&testnext_state, &test_update_data->testnext, sizeof(WLEDState));
         test_state.print();
         testnext_state.print();
         //out_data.print();
   
         // Catch up to this state
-        bri = test_state.test;
+        bri = test_state.brightness;
+        effectCurrent = test_state.fx_mode;
+        byte version = 1;   // set version (see WLED)
+        Segment& mainseg = strip.getMainSegment();
+        strip.getMainSegment().setColor(0, RGBW32(test_state.red, test_state.green, test_state.blue, (version > 0) ? test_state.white : 0));
         // load_pattern(state);
         // load_palette(state);
         // load_effect(state);
