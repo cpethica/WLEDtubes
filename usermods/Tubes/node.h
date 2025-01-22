@@ -4,8 +4,14 @@
 #include "global_state.h"
 #include "espnow_broadcast.h"
 
-#define DEFAULT_WIFI "TP-Link_FB90"
-#define DEFAULT_WIFI_PASSWORD "50032075"
+//#define SET_AS_LEADER     // comment out for non-leader nodes
+#ifdef SET_AS_LEADER
+    #define DEFAULT_WIFI "TP-Link_FB90"
+    #define DEFAULT_WIFI_PASSWORD "50032075"
+    #define SET_AS_HIGHEST_ID       // make this node the leader - all others are assigned random lower ID's     
+#endif
+
+
 #define NODE_DEBUGGING
 // #define RELAY_DEBUGGING
 #define TESTING_NODE_ID 0
@@ -354,7 +360,9 @@ class LightNode {
         if (id == 0) {
 #if defined(LOLIN_WIFI_FIX) && (defined(ARDUINO_ARCH_ESP32C3) || defined(ARDUINO_ARCH_ESP32S2) || defined(ARDUINO_ARCH_ESP32S3))
             id = random(10, 255);  // Leave room at bottom and top of 12 bits
-#else
+#elif defined(SET_AS_HIGHEST_ID)
+            id = 4001;  // out of range of randomly set nodes
+#else            
             id = random(256, 4000);  // Leave room at bottom and top of 12 bits
 #endif
         }
